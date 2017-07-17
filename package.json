@@ -1,0 +1,19 @@
+{
+  "name": "hapi-acl-auth",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "deep-assign": "^2.0.0",
+    "dot-prop": "^4.1.1",
+    "hapi": "^16.4.3"
+  },
+  "devDependencies": {
+    "hapi-server-session": "^3.0.2"
+  }
+}
