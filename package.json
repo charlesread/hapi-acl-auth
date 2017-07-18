@@ -4,16 +4,31 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha",
+    "lint": "standard"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "boom": "^5.1.0",
     "deep-assign": "^2.0.0",
     "dot-prop": "^4.1.1",
-    "hapi": "^16.4.3"
+    "hapi": "^16.4.3",
+    "lodash": "^4.17.4",
+    "type-detect": "^4.0.3"
   },
   "devDependencies": {
-    "hapi-server-session": "^3.0.2"
-  }
+    "hapi-server-session": "^3.0.2",
+    "mocha": "^3.4.2",
+    "pre-commit": "^1.2.2"
+  },
+  "standard": {
+    "env": [
+      "mocha"
+    ]
+  },
+  "pre-commit": [
+    "test",
+    "lint"
+  ]
 }

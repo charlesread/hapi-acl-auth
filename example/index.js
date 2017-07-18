@@ -2,7 +2,6 @@
 
 const Hapi = require('hapi')
 
-// Create a server with a host and port
 const server = new Hapi.Server()
 server.connection({
   host: 'localhost',
@@ -11,17 +10,12 @@ server.connection({
 
 const plugins = [
   {
-    register: require('hapi-server-session'),
-    options: {
-      cookie: {
-        isSecure: false,
-      },
-    },
-  },
-  {
     register: require('../index'),
     options: {
-      loginPath: '/login1'
+      handler: function (request, callback) {
+        callback(null, {username: 'cread', roles: ['SUPERUSER']})
+      },
+      hierarchy: ['USER', 'ADMIN', 'SUPERUSER']
     }
   }
 ]
@@ -32,14 +26,13 @@ server.register(
     if (err) {
       throw err
     }
-
     server.route({
       method: 'GET',
       path: '/protected',
       config: {
         plugins: {
-          hapiAuthAuth: {
-            secure: true
+          hapiAclAuth: {
+            roles: ['ADMIN']
           }
         }
       },
@@ -51,18 +44,10 @@ server.register(
     server.route({
       method: 'GET',
       path: '/notprotected',
-      config: {
-        plugins: {
-          hapiAuthAuth: {
-            secure: false
-          }
-        }
-      },
       handler: function (request, reply) {
         return reply('notprotected')
       }
     })
-
   })
 
 server.start((err) => {
