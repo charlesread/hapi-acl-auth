@@ -1,1 +1,1 @@
-https://travis-ci.org/charlesread/hapi-acl-auth.svg?branch=master
+[![Build Status](https://travis-ci.org/charlesread/hapi-acl-auth.svg?branch=master)](https://travis-ci.org/charlesread/hapi-acl-auth)
