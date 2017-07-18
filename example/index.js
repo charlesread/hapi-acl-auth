@@ -1,5 +1,7 @@
 'use strict'
 
+const fs = require('fs')
+const path = require('path')
 const Hapi = require('hapi')
 
 const server = new Hapi.Server()
@@ -13,9 +15,12 @@ const plugins = [
     register: require('../index'),
     options: {
       handler: function (request, callback) {
-        callback(null, {username: 'cread', roles: ['SUPERUSER']})
+        callback(null, {username: 'cread', roles: ['USER']})
       },
-      hierarchy: ['USER', 'ADMIN', 'SUPERUSER']
+      hierarchy: ['USER', 'ADMIN', 'SUPERUSER'],
+      forbiddenPageFunction: function (obj) {
+        return 'sorry, ' + obj.username  // sorry, cread
+      }
     }
   }
 ]

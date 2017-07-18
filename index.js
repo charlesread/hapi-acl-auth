@@ -10,6 +10,7 @@ const authorization = require(path.join(__dirname, 'lib', 'authorization.js'))
 
 const pluginDefaults = {
   forbiddenPagePath: path.join(__dirname, 'static', '403.html'),
+  forbiddenPageStream: undefined,
   any: true,
   all: false
 }
@@ -19,7 +20,6 @@ function plugin (server, options, next) {
     const routeOptions = req.route.settings.plugins['hapi-acl-auth'] || req.route.settings.plugins['hapiAclAuth']
     const pluginOptions = deepAssign({}, pluginDefaults, options)
     const combinedOptions = deepAssign({}, pluginOptions, routeOptions)
-    console.log(combinedOptions)
     if (routeOptions && routeOptions.roles) {
       combinedOptions.handler(req, function (err, callbackObject) {
         if (err) {
@@ -27,7 +27,7 @@ function plugin (server, options, next) {
         }
         const isAuthorized = authorization.determineAuthorization(combinedOptions, callbackObject)
         if (!isAuthorized) {
-          reply(fs.createReadStream(combinedOptions.forbiddenPagePath)).code(403)
+          reply(combinedOptions.forbiddenPageFunction(callbackObject) || fs.createReadStream(combinedOptions.forbiddenPagePath)).code(403)
         } else {
           reply.continue()
         }
