@@ -1,0 +1,1 @@
+https://travis-ci.org/charlesread/hapi-acl-auth.svg?branch=master
