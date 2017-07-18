@@ -1,7 +1,7 @@
 {
   "name": "hapi-acl-auth",
   "version": "0.0.1",
-  "description": "",
+  "description": "Authentication agnostic authorization plugin for HapiJS",
   "main": "index.js",
   "scripts": {
     "test": "mocha",
@@ -9,16 +9,27 @@
   },
   "author": "",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/charlesread/hapi-acl-auth"
+  },
+  "bugs": {
+    "url": "https://github.com/charlesread/hapi-acl-auth/issues",
+    "email": "charles@charlesread.com"
+  },
+  "keywords": [
+    "hapi",
+    "authorization",
+    "acl",
+    "auth"
+  ],
   "dependencies": {
-    "boom": "^5.1.0",
     "deep-assign": "^2.0.0",
-    "dot-prop": "^4.1.1",
     "hapi": "^16.4.3",
     "lodash": "^4.17.4",
     "type-detect": "^4.0.3"
   },
   "devDependencies": {
-    "hapi-server-session": "^3.0.2",
     "mocha": "^3.4.2",
     "pre-commit": "^1.2.2"
   },
