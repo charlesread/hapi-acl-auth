@@ -36,7 +36,7 @@ server.register(
       config: {
         plugins: {
           hapiAclAuth: {
-            roles: ['SUPERUSER'],
+            roles: ['ADMIN'],
             secure: true
           }
         }
