@@ -2,7 +2,6 @@
 
 const pjson = require('./package.json')
 
-const fs = require('fs')
 const path = require('path')
 const util = require('util')
 const deepAssign = require('deep-assign')
