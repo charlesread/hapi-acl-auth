@@ -2,6 +2,7 @@
 
 const assert = require('assert')
 const path = require('path')
+const type = require('type-detect')
 
 const authorization = require(path.join(__dirname, '..', 'lib', 'authorization.js'))
 
@@ -110,6 +111,40 @@ describe('authorization.js', function () {
         routeOptions.hierarchy = ['reporter', 'user', 'admin', 'superuser']
         routeOptions.roles = ['superuser', 'admin']
         callbackObject.roles = ['user', 'reporter']
+        assert.equal(false, authorization.determineAuthorization(routeOptions, callbackObject))
+      })
+    })
+    describe('roles as function', function () {
+      it('plugin/route roles is function, callback roles is array, user has access', function () {
+        routeOptions.roles = function (cbo) {
+          assert(cbo)
+          return ['reporter', 'user', 'admin', 'superuser']
+        }
+        callbackObject.roles = ['user']
+        assert.equal(true, authorization.determineAuthorization(routeOptions, callbackObject))
+      })
+      it('plugin/route roles is array, callback roles is function, user has access', function () {
+        routeOptions.roles = ['reporter', 'user', 'admin', 'superuser']
+        callbackObject.roles = function (cbo) {
+          assert(cbo)
+          return ['user']
+        }
+        assert.equal(true, authorization.determineAuthorization(routeOptions, callbackObject))
+      })
+      it('plugin/route roles is function, callback roles is array, user does not have access', function () {
+        routeOptions.roles = function (cbo) {
+          assert(cbo)
+          return ['admin', 'superuser']
+        }
+        callbackObject.roles = ['user']
+        assert.equal(false, authorization.determineAuthorization(routeOptions, callbackObject))
+      })
+      it('plugin/route roles is array, callback roles is function, user does not have access', function () {
+        routeOptions.roles = ['admin', 'superuser']
+        callbackObject.roles = function (cbo) {
+          assert(cbo)
+          return ['user']
+        }
         assert.equal(false, authorization.determineAuthorization(routeOptions, callbackObject))
       })
     })
