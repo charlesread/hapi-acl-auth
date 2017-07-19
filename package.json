@@ -24,8 +24,10 @@
     "auth"
   ],
   "dependencies": {
+    "boom": "^5.1.0",
     "deep-assign": "^2.0.0",
     "hapi": "^16.4.3",
+    "joi": "^10.6.0",
     "lodash": "^4.17.4",
     "type-detect": "^4.0.3"
   },

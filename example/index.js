@@ -13,12 +13,13 @@ const plugins = [
     register: require('../index'),
     options: {
       handler: function (request, callback) {
-        callback(null, {username: 'cread', roles: ['USER']})
+        callback(null, {username: 'cread', roles: ['SUPERUSER']})
       },
       hierarchy: ['USER', 'ADMIN', 'SUPERUSER'],
       forbiddenPageFunction: function (obj) {
         return 'sorry, ' + obj.username  // sorry, cread
-      }
+      },
+      roles: ['ADMIN']
     }
   }
 ]
@@ -35,7 +36,8 @@ server.register(
       config: {
         plugins: {
           hapiAclAuth: {
-            roles: ['ADMIN']
+            roles: ['SUPERUSER'],
+            secure: true
           }
         }
       },
