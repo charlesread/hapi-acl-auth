@@ -16,7 +16,7 @@ function plugin (server, opts, next) {
         if (err) {
           throw err
         }
-        const isAuthorized = authorization.determineAuthorization(combinedOptions, callbackObject)
+        const isAuthorized = authorization.determineAuthorization(combinedOptions, callbackObject, req)
         if (!isAuthorized) {
           reply(combinedOptions.forbiddenPageFunction ? combinedOptions.forbiddenPageFunction(callbackObject) : Boom.forbidden())
         } else {

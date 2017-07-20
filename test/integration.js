@@ -11,6 +11,7 @@ const request = require('request')
 let server
 
 const plugin = require(path.join(__dirname, '..', 'index.js'))
+const cache = require(path.join(__dirname, '..', 'lib', 'cache.js'))()
 
 describe('integration testing', function () {
 
@@ -24,6 +25,7 @@ describe('integration testing', function () {
     done()
   })
   afterEach(function (done) {
+    cache.reset()
     server.stop({timeout: 5000}, function (err) {
       if (err) {
         console.error(err.message)
@@ -561,6 +563,60 @@ describe('integration testing', function () {
           },
           hierarchy: ['USER', 'ADMIN', 'SUPERUSER'],
           policy: 'allow'
+        }
+      },
+      function (err) {
+        if (err) {
+          console.error(err)
+        }
+        server.route({
+          method: 'GET',
+          path: '/protected',
+          config: {
+            plugins: {
+              hapiAclAuth: {
+                roles: ['ADMIN'],
+                secure: true
+              }
+            }
+          },
+          handler: function (request, reply) {
+            return reply('protected')
+          }
+        })
+        server.start(function (err) {
+          if (err) {
+            console.error(err.message)
+            done()
+          }
+          request(
+            {
+              url: 'http://localhost:9999/protected',
+              method: 'get'
+            },
+            function (err,httpResponse,body) {
+              if (err) {
+                console.error(err.message)
+              }
+              httpResponse.statusCode.should.equal(200)
+              done()
+            }
+          )
+        })
+      }
+    )
+  })
+
+  it('enabling the cache shouldn\'t kill everything', function (done) {
+    server.register({
+        register: plugin,
+        options: {
+          handler: function (request, callback) {
+            callback(null, {username: 'cread', roles: ['SUPERUSER']})
+          },
+          hierarchy: ['USER', 'ADMIN', 'SUPERUSER'],
+          policy: 'allow',
+          cache: true
         }
       },
       function (err) {
