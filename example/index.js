@@ -13,7 +13,7 @@ const plugins = [
     register: require('../index'),
     options: {
       handler: function (request, callback) {
-        callback(null, {username: 'cread', roles: ['SUPERUSER']})
+        callback(null, {username: 'cread', roles: ['ADMIN']})
       },
       hierarchy: ['USER', 'ADMIN', 'SUPERUSER'],
       forbiddenPageFunction: function (obj) {
@@ -33,16 +33,15 @@ server.register(
     server.route({
       method: 'GET',
       path: '/protected',
+      handler: function (request, reply) {
+        return reply('protected')
+      },
       config: {
         plugins: {
           hapiAclAuth: {
-            roles: ['ADMIN'],
-            secure: true
+            roles: ['SUPERUSER']
           }
         }
-      },
-      handler: function (request, reply) {
-        return reply('protected')
       }
     })
 

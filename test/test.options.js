@@ -134,5 +134,43 @@ describe('options.js', function () {
       const {combinedOptions} = options(req, _pluginOptions)
       _pluginOptions.roles.should.eql(combinedOptions.roles)
     })
+    it('roles in plugin options should be able to be a function', function () {
+      const req = {}
+      req.route = {
+        settings: {
+          plugins: {}
+        }
+      }
+      const _pluginOptions = {
+        handler: function () {
+        },
+        roles: function () {
+          return ['a']
+        }
+      }
+      options(req, _pluginOptions)
+    })
+    it('roles in plugin options and route options should be able to be a function', function () {
+      const req = {}
+      req.route = {
+        settings: {
+          plugins: {
+            hapiAclAuth: {
+              roles: function () {
+                return ['a']
+              }
+            }
+          }
+        }
+      }
+      const _pluginOptions = {
+        handler: function () {
+        },
+        roles: function () {
+          return ['a']
+        }
+      }
+      options(req, _pluginOptions)
+    })
   })
 })
