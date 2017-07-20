@@ -1,6 +1,6 @@
 {
   "name": "hapi-acl-auth",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Authentication agnostic authorization plugin for HapiJS",
   "main": "index.js",
   "scripts": {
