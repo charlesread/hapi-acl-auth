@@ -102,6 +102,7 @@ Most options can be specified at the plugin level, or for each individual route.
 | all | `Boolean` | `false` | `true`&#124;`false` | specifies whether a user _must_ possess _all_ of the allowed routes in order to be authorized. |
 | hierarchy | `Array` |  |  | an `Array` that specifies the privilege hierarchy of roles in order of ascending privilege.  For instance, suppose we have  `hierarchy: ['user', 'admin', 'superuser]` configured for a route and `roles: ['admin']` configured for that same route.  A user with the `superuser` role will be able to access that route because the `superuser` role is of higher privilege than the `admin` role, as specified in the hierarchy. |
 | forbiddenPageFunction | `function` |  |  | a `function` with signature `function(object)` (*NOTE*: the `object` argument here is the _same_ as the object in `handler(err, object)`), that returns the content to be rendered to the browser when a user is not authorized.  That which this function returns is passed to [hapi's reply](https://hapijs.com/api#reply-interface) interface, so it can be lots of things, like a `Stream` or a `string`. |
+| cache | `Boolean` | `false` | `true`&#124;`false` | if caching is enabled the `roles` arrays will be cached, this is helpful if you use resource intensive functions to return roles in the `handler` function or the `roles` attribute |
 
 ### Plugin _only_ options
 

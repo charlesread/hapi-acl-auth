@@ -13,6 +13,9 @@ let server
 const plugin = require(path.join(__dirname, '..', 'index.js'))
 const cache = require(path.join(__dirname, '..', 'lib', 'cache.js'))()
 
+const url = 'http://localhost:9999/protected'
+const method = 'get'
+
 describe('integration testing', function () {
 
   //
@@ -38,19 +41,17 @@ describe('integration testing', function () {
 
   it('secure endpoint should return 403 when required route role does not match user role', function (done) {
     server.register({
-      register: plugin,
-      options: {
+        register: plugin,
+        options: {
           handler: function (request, callback) {
             callback(null, {username: 'cread', roles: ['USER']})
           }
         }
       },
       function (err) {
-        if (err) {
-          console.error(err)
-        }
+        if (err) throw err
         server.route({
-          method: 'GET',
+          method,
           path: '/protected',
           config: {
             plugins: {
@@ -65,19 +66,10 @@ describe('integration testing', function () {
           }
         })
         server.start(function (err) {
-          if (err) {
-            console.error(err.message)
-            done()
-          }
-          request(
-            {
-              url: 'http://localhost:9999/protected',
-              method: 'get'
-            },
-            function (err,httpResponse,body) {
-              if (err) {
-                console.error(err.message)
-              }
+          if (err) throw err
+          request({url, method},
+            function (err, httpResponse, body) {
+              if (err) throw err
               httpResponse.statusCode.should.equal(403)
               done()
             }
@@ -97,11 +89,9 @@ describe('integration testing', function () {
         }
       },
       function (err) {
-        if (err) {
-          console.error(err)
-        }
+        if (err) throw err
         server.route({
-          method: 'GET',
+          method,
           path: '/protected',
           config: {
             plugins: {
@@ -116,19 +106,10 @@ describe('integration testing', function () {
           }
         })
         server.start(function (err) {
-          if (err) {
-            console.error(err.message)
-            done()
-          }
-          request(
-            {
-              url: 'http://localhost:9999/protected',
-              method: 'get'
-            },
-            function (err,httpResponse,body) {
-              if (err) {
-                console.error(err.message)
-              }
+          if (err) throw err
+          request({url, method},
+            function (err, httpResponse, body) {
+              if (err) throw err
               httpResponse.statusCode.should.equal(403)
               done()
             }
@@ -148,11 +129,9 @@ describe('integration testing', function () {
         }
       },
       function (err) {
-        if (err) {
-          console.error(err)
-        }
+        if (err) throw err
         server.route({
-          method: 'GET',
+          method,
           path: '/protected',
           config: {
             plugins: {
@@ -167,19 +146,10 @@ describe('integration testing', function () {
           }
         })
         server.start(function (err) {
-          if (err) {
-            console.error(err.message)
-            done()
-          }
-          request(
-            {
-              url: 'http://localhost:9999/protected',
-              method: 'get'
-            },
-            function (err,httpResponse,body) {
-              if (err) {
-                console.error(err.message)
-              }
+          if (err) throw err
+          request({url, method},
+            function (err, httpResponse, body) {
+              if (err) throw err
               httpResponse.statusCode.should.equal(200)
               done()
             }
@@ -199,11 +169,9 @@ describe('integration testing', function () {
         }
       },
       function (err) {
-        if (err) {
-          console.error(err)
-        }
+        if (err) throw err
         server.route({
-          method: 'GET',
+          method,
           path: '/protected',
           config: {
             plugins: {
@@ -218,19 +186,10 @@ describe('integration testing', function () {
           }
         })
         server.start(function (err) {
-          if (err) {
-            console.error(err.message)
-            done()
-          }
-          request(
-            {
-              url: 'http://localhost:9999/protected',
-              method: 'get'
-            },
-            function (err,httpResponse,body) {
-              if (err) {
-                console.error(err.message)
-              }
+          if (err) throw err
+          request({url, method},
+            function (err, httpResponse, body) {
+              if (err) throw err
               httpResponse.statusCode.should.equal(200)
               done()
             }
@@ -251,11 +210,9 @@ describe('integration testing', function () {
         }
       },
       function (err) {
-        if (err) {
-          console.error(err)
-        }
+        if (err) throw err
         server.route({
-          method: 'GET',
+          method,
           path: '/protected',
           config: {
             plugins: {
@@ -270,19 +227,10 @@ describe('integration testing', function () {
           }
         })
         server.start(function (err) {
-          if (err) {
-            console.error(err.message)
-            done()
-          }
-          request(
-            {
-              url: 'http://localhost:9999/protected',
-              method: 'get'
-            },
-            function (err,httpResponse,body) {
-              if (err) {
-                console.error(err.message)
-              }
+          if (err) throw err
+          request({url, method},
+            function (err, httpResponse, body) {
+              if (err) throw err
               httpResponse.statusCode.should.equal(200)
               done()
             }
@@ -303,11 +251,9 @@ describe('integration testing', function () {
         }
       },
       function (err) {
-        if (err) {
-          console.error(err)
-        }
+        if (err) throw err
         server.route({
-          method: 'GET',
+          method,
           path: '/protected',
           config: {
             plugins: {
@@ -322,19 +268,10 @@ describe('integration testing', function () {
           }
         })
         server.start(function (err) {
-          if (err) {
-            console.error(err.message)
-            done()
-          }
-          request(
-            {
-              url: 'http://localhost:9999/protected',
-              method: 'get'
-            },
-            function (err,httpResponse,body) {
-              if (err) {
-                console.error(err.message)
-              }
+          if (err) throw err
+          request({url, method},
+            function (err, httpResponse, body) {
+              if (err) throw err
               httpResponse.statusCode.should.equal(403)
               done()
             }
@@ -355,11 +292,9 @@ describe('integration testing', function () {
         }
       },
       function (err) {
-        if (err) {
-          console.error(err)
-        }
+        if (err) throw err
         server.route({
-          method: 'GET',
+          method,
           path: '/protected',
           config: {
             plugins: {
@@ -374,19 +309,10 @@ describe('integration testing', function () {
           }
         })
         server.start(function (err) {
-          if (err) {
-            console.error(err.message)
-            done()
-          }
-          request(
-            {
-              url: 'http://localhost:9999/protected',
-              method: 'get'
-            },
-            function (err,httpResponse,body) {
-              if (err) {
-                console.error(err.message)
-              }
+          if (err) throw err
+          request({url, method},
+            function (err, httpResponse, body) {
+              if (err) throw err
               httpResponse.statusCode.should.equal(200)
               done()
             }
@@ -407,11 +333,9 @@ describe('integration testing', function () {
         }
       },
       function (err) {
-        if (err) {
-          console.error(err)
-        }
+        if (err) throw err
         server.route({
-          method: 'GET',
+          method,
           path: '/protected',
           config: {
             plugins: {
@@ -426,19 +350,10 @@ describe('integration testing', function () {
           }
         })
         server.start(function (err) {
-          if (err) {
-            console.error(err.message)
-            done()
-          }
-          request(
-            {
-              url: 'http://localhost:9999/protected',
-              method: 'get'
-            },
-            function (err,httpResponse,body) {
-              if (err) {
-                console.error(err.message)
-              }
+          if (err) throw err
+          request({url, method},
+            function (err, httpResponse, body) {
+              if (err) throw err
               httpResponse.statusCode.should.equal(403)
               done()
             }
@@ -460,11 +375,9 @@ describe('integration testing', function () {
         }
       },
       function (err) {
-        if (err) {
-          console.error(err)
-        }
+        if (err) throw err
         server.route({
-          method: 'GET',
+          method,
           path: '/protected',
           config: {
             plugins: {
@@ -479,19 +392,10 @@ describe('integration testing', function () {
           }
         })
         server.start(function (err) {
-          if (err) {
-            console.error(err.message)
-            done()
-          }
-          request(
-            {
-              url: 'http://localhost:9999/protected',
-              method: 'get'
-            },
-            function (err,httpResponse,body) {
-              if (err) {
-                console.error(err.message)
-              }
+          if (err) throw err
+          request({url, method},
+            function (err, httpResponse, body) {
+              if (err) throw err
               httpResponse.statusCode.should.equal(200)
               done()
             }
@@ -513,11 +417,9 @@ describe('integration testing', function () {
         }
       },
       function (err) {
-        if (err) {
-          console.error(err)
-        }
+        if (err) throw err
         server.route({
-          method: 'GET',
+          method,
           path: '/protected',
           config: {
             plugins: {
@@ -532,19 +434,10 @@ describe('integration testing', function () {
           }
         })
         server.start(function (err) {
-          if (err) {
-            console.error(err.message)
-            done()
-          }
-          request(
-            {
-              url: 'http://localhost:9999/protected',
-              method: 'get'
-            },
-            function (err,httpResponse,body) {
-              if (err) {
-                console.error(err.message)
-              }
+          if (err) throw err
+          request({url, method},
+            function (err, httpResponse, body) {
+              if (err) throw err
               httpResponse.statusCode.should.equal(403)
               done()
             }
@@ -566,11 +459,9 @@ describe('integration testing', function () {
         }
       },
       function (err) {
-        if (err) {
-          console.error(err)
-        }
+        if (err) throw err
         server.route({
-          method: 'GET',
+          method,
           path: '/protected',
           config: {
             plugins: {
@@ -585,19 +476,10 @@ describe('integration testing', function () {
           }
         })
         server.start(function (err) {
-          if (err) {
-            console.error(err.message)
-            done()
-          }
-          request(
-            {
-              url: 'http://localhost:9999/protected',
-              method: 'get'
-            },
-            function (err,httpResponse,body) {
-              if (err) {
-                console.error(err.message)
-              }
+          if (err) throw err
+          request({url, method},
+            function (err, httpResponse, body) {
+              if (err) throw err
               httpResponse.statusCode.should.equal(200)
               done()
             }
@@ -620,11 +502,9 @@ describe('integration testing', function () {
         }
       },
       function (err) {
-        if (err) {
-          console.error(err)
-        }
+        if (err) throw err
         server.route({
-          method: 'GET',
+          method,
           path: '/protected',
           config: {
             plugins: {
@@ -639,19 +519,55 @@ describe('integration testing', function () {
           }
         })
         server.start(function (err) {
-          if (err) {
-            console.error(err.message)
-            done()
-          }
-          request(
-            {
-              url: 'http://localhost:9999/protected',
-              method: 'get'
-            },
-            function (err,httpResponse,body) {
-              if (err) {
-                console.error(err.message)
+          if (err) throw err
+          request({url, method},
+            function (err, httpResponse, body) {
+              if (err) throw err
+              httpResponse.statusCode.should.equal(200)
+              done()
+            }
+          )
+        })
+      }
+    )
+  })
+
+  it('if cache is enabled it should contain a cached path object', function (done) {
+    server.register({
+        register: plugin,
+        options: {
+          handler: function (request, callback) {
+            callback(null, {username: 'cread', roles: ['SUPERUSER']})
+          },
+          hierarchy: ['USER', 'ADMIN', 'SUPERUSER'],
+          policy: 'allow',
+          cache: true
+        }
+      },
+      function (err) {
+        if (err) throw err
+        server.route({
+          method,
+          path: '/protected',
+          config: {
+            plugins: {
+              hapiAclAuth: {
+                roles: ['ADMIN'],
+                secure: true
               }
+            }
+          },
+          handler: function (request, reply) {
+            return reply('protected')
+          }
+        })
+        server.start(function (err) {
+          if (err) throw err
+          request({url, method},
+            function (err, httpResponse, body) {
+              if (err) throw err
+              cache.get('/protected').should.have.own.property('allowed')
+              cache.get('/protected').should.have.own.property('actual')
               httpResponse.statusCode.should.equal(200)
               done()
             }
