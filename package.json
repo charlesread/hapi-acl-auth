@@ -30,6 +30,7 @@
     "hapi": "^16.4.3",
     "joi": "^10.6.0",
     "lodash": "^4.17.4",
+    "lru-cache": "^4.1.1",
     "type-detect": "^4.0.3"
   },
   "devDependencies": {
