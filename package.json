@@ -25,6 +25,8 @@
     "auth"
   ],
   "dependencies": {
+    "bluebird": "^3.5.0",
+    "bluebird-co": "^2.2.0",
     "boom": "^5.1.0",
     "deep-assign": "^2.0.0",
     "hapi": "^16.4.3",

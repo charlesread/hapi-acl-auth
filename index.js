@@ -16,12 +16,20 @@ function plugin (server, opts, next) {
         if (err) {
           throw err
         }
-        const isAuthorized = authorization.determineAuthorization(combinedOptions, callbackObject, req)
-        if (!isAuthorized) {
-          reply(combinedOptions.forbiddenPageFunction ? combinedOptions.forbiddenPageFunction(callbackObject) : Boom.forbidden())
-        } else {
-          reply.continue()
-        }
+        authorization.determineAuthorization(combinedOptions, callbackObject, req)
+          .then((isAuthorized) => {
+            if (!isAuthorized) {
+              reply(combinedOptions.forbiddenPageFunction ? combinedOptions.forbiddenPageFunction(callbackObject) : Boom.forbidden())
+            } else {
+              reply.continue()
+            }
+          })
+        // const isAuthorized = authorization.determineAuthorization(combinedOptions, callbackObject, req)
+        // if (!isAuthorized) {
+        //   reply(combinedOptions.forbiddenPageFunction ? combinedOptions.forbiddenPageFunction(callbackObject) : Boom.forbidden())
+        // } else {
+        //   reply.continue()
+        // }
       })
     } else {
       reply.continue()

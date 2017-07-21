@@ -13,7 +13,7 @@ const plugins = [
     register: require('../index'),
     options: {
       handler: function (request, callback) {
-        callback(null, {username: 'cread', roles: ['ADMIN']})
+        callback(null, {username: 'cread', roles: ['SUPERUSER']})
       },
       hierarchy: ['USER', 'ADMIN', 'SUPERUSER'],
       forbiddenPageFunction: function (obj) {

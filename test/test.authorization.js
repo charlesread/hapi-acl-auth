@@ -21,13 +21,19 @@ describe('authorization.js', function () {
         routeOptions.any = true
         routeOptions.roles = ['foo', 'bar', 'baz']
         callbackObject.roles = ['foo']
-        assert.equal(true, authorization.determineAuthorization(routeOptions, callbackObject, req))
+        authorization.determineAuthorization(routeOptions, callbackObject, req)
+          .then((v) => {
+            assert.equal(true, v)
+          })
       })
       it('should return false if several roles are allowed and user has none', function () {
         routeOptions.any = true
         routeOptions.roles = ['foo', 'bar', 'baz']
         callbackObject.roles = ['bat']
-        assert.equal(false, authorization.determineAuthorization(routeOptions, callbackObject, req))
+        authorization.determineAuthorization(routeOptions, callbackObject, req)
+          .then((v) => {
+            assert.equal(false, v)
+          })
       })
     })
     describe('all: false', function () {
@@ -41,13 +47,19 @@ describe('authorization.js', function () {
         routeOptions.all = false
         routeOptions.roles = ['foo', 'bar', 'baz']
         callbackObject.roles = ['foo']
-        assert.equal(true, authorization.determineAuthorization(routeOptions, callbackObject, req))
+        authorization.determineAuthorization(routeOptions, callbackObject, req)
+          .then((v) => {
+            assert.equal(true, v)
+          })
       })
       it('should return false if several roles are allowed and user has none', function () {
         routeOptions.all = false
         routeOptions.roles = ['foo', 'bar', 'baz']
         callbackObject.roles = ['bat']
-        assert.equal(false, authorization.determineAuthorization(routeOptions, callbackObject, req))
+        authorization.determineAuthorization(routeOptions, callbackObject, req)
+          .then((v) => {
+            assert.equal(false, v)
+          })
       })
     })
     describe('all: true', function () {
@@ -55,19 +67,28 @@ describe('authorization.js', function () {
         routeOptions.all = true
         routeOptions.roles = ['foo', 'bar', 'baz']
         callbackObject.roles = ['foo', 'bar', 'baz']
-        assert.equal(true, authorization.determineAuthorization(routeOptions, callbackObject, req))
+        authorization.determineAuthorization(routeOptions, callbackObject, req)
+          .then((v) => {
+            assert.equal(true, v)
+          })
       })
       it('should return false if several roles are allowed and user has none', function () {
         routeOptions.all = true
         routeOptions.roles = ['foo', 'bar', 'baz']
         callbackObject.roles = []
-        assert.equal(false, authorization.determineAuthorization(routeOptions, callbackObject, req))
+        authorization.determineAuthorization(routeOptions, callbackObject, req)
+          .then((v) => {
+            assert.equal(false, v)
+          })
       })
       it('should return false if several roles are allowed and user has only one', function () {
         routeOptions.all = true
         routeOptions.roles = ['foo', 'bar', 'baz']
         callbackObject.roles = ['foo']
-        assert.equal(false, authorization.determineAuthorization(routeOptions, callbackObject, req))
+        authorization.determineAuthorization(routeOptions, callbackObject, req)
+          .then((v) => {
+            assert.equal(false, v)
+          })
       })
     })
     describe('all: true, any: true, all should take precedence', function () {
@@ -76,21 +97,30 @@ describe('authorization.js', function () {
         routeOptions.all = true
         routeOptions.roles = ['foo', 'bar', 'baz']
         callbackObject.roles = ['foo', 'bar', 'baz']
-        assert.equal(true, authorization.determineAuthorization(routeOptions, callbackObject, req))
+        authorization.determineAuthorization(routeOptions, callbackObject, req)
+          .then((v) => {
+            assert.equal(true, v)
+          })
       })
       it('should return false if several roles are allowed and user has none', function () {
         routeOptions.any = true
         routeOptions.all = true
         routeOptions.roles = ['foo', 'bar', 'baz']
         callbackObject.roles = []
-        assert.equal(false, authorization.determineAuthorization(routeOptions, callbackObject, req))
+        authorization.determineAuthorization(routeOptions, callbackObject, req)
+          .then((v) => {
+            assert.equal(false, v)
+          })
       })
       it('should return false if several roles are allowed and user has only one', function () {
         routeOptions.any = true
         routeOptions.all = true
         routeOptions.roles = ['foo', 'bar', 'baz']
         callbackObject.roles = ['foo']
-        assert.equal(false, authorization.determineAuthorization(routeOptions, callbackObject, req))
+        authorization.determineAuthorization(routeOptions, callbackObject, req)
+          .then((v) => {
+            assert.equal(false, v)
+          })
       })
     })
     describe('hierarchy', function () {
@@ -98,31 +128,46 @@ describe('authorization.js', function () {
         routeOptions.hierarchy = ['reporter', 'user', 'admin', 'superuser']
         routeOptions.roles = ['superuser', 'user']
         callbackObject.roles = ['admin']
-        assert.equal(true, authorization.determineAuthorization(routeOptions, callbackObject, req))
+        authorization.determineAuthorization(routeOptions, callbackObject, req)
+          .then((v) => {
+            assert.equal(true, v)
+          })
       })
       it('should return true when actual role is equal to an allowed role', function () {
         routeOptions.hierarchy = ['reporter', 'user', 'admin', 'superuser']
         routeOptions.roles = ['superuser', 'admin']
         callbackObject.roles = ['admin']
-        assert.equal(true, authorization.determineAuthorization(routeOptions, callbackObject, req))
+        authorization.determineAuthorization(routeOptions, callbackObject, req)
+          .then((v) => {
+            assert.equal(true, v)
+          })
       })
       it('should return true when actual roles are more privileged than least privileged allowed role', function () {
         routeOptions.hierarchy = ['reporter', 'user', 'admin', 'superuser']
         routeOptions.roles = ['reporter', 'user']
         callbackObject.roles = ['admin', 'superuser']
-        assert.equal(true, authorization.determineAuthorization(routeOptions, callbackObject, req))
+        authorization.determineAuthorization(routeOptions, callbackObject, req)
+          .then((v) => {
+            assert.equal(true, v)
+          })
       })
       it('should return false when actual role is less privileged than least privileged allowed role', function () {
         routeOptions.hierarchy = ['reporter', 'user', 'admin', 'superuser']
         routeOptions.roles = ['superuser', 'admin']
         callbackObject.roles = ['user']
-        assert.equal(false, authorization.determineAuthorization(routeOptions, callbackObject, req))
+        authorization.determineAuthorization(routeOptions, callbackObject, req)
+          .then((v) => {
+            assert.equal(false, v)
+          })
       })
       it('should return false when actual roles are less privileged than least privileged allowed role', function () {
         routeOptions.hierarchy = ['reporter', 'user', 'admin', 'superuser']
         routeOptions.roles = ['superuser', 'admin']
         callbackObject.roles = ['user', 'reporter']
-        assert.equal(false, authorization.determineAuthorization(routeOptions, callbackObject, req))
+        authorization.determineAuthorization(routeOptions, callbackObject, req)
+          .then((v) => {
+            assert.equal(false, v)
+          })
       })
     })
     describe('roles as function', function () {
@@ -132,7 +177,10 @@ describe('authorization.js', function () {
           return ['reporter', 'user', 'admin', 'superuser']
         }
         callbackObject.roles = ['user']
-        assert.equal(true, authorization.determineAuthorization(routeOptions, callbackObject, req))
+        authorization.determineAuthorization(routeOptions, callbackObject, req)
+          .then((v) => {
+            assert.equal(true, v)
+          })
       })
       it('plugin/route roles is array, callback roles is function, user has access', function () {
         routeOptions.roles = ['reporter', 'user', 'admin', 'superuser']
@@ -140,7 +188,10 @@ describe('authorization.js', function () {
           assert(cbo)
           return ['user']
         }
-        assert.equal(true, authorization.determineAuthorization(routeOptions, callbackObject, req))
+        authorization.determineAuthorization(routeOptions, callbackObject, req)
+          .then((v) => {
+            assert.equal(true, v)
+          })
       })
       it('plugin/route roles is function, callback roles is array, user does not have access', function () {
         routeOptions.roles = function (cbo) {
@@ -148,7 +199,10 @@ describe('authorization.js', function () {
           return ['admin', 'superuser']
         }
         callbackObject.roles = ['user']
-        assert.equal(false, authorization.determineAuthorization(routeOptions, callbackObject, req))
+        authorization.determineAuthorization(routeOptions, callbackObject, req)
+          .then((v) => {
+            assert.equal(false, v)
+          })
       })
       it('plugin/route roles is array, callback roles is function, user does not have access', function () {
         routeOptions.roles = ['admin', 'superuser']
@@ -156,7 +210,73 @@ describe('authorization.js', function () {
           assert(cbo)
           return ['user']
         }
-        assert.equal(false, authorization.determineAuthorization(routeOptions, callbackObject, req))
+        authorization.determineAuthorization(routeOptions, callbackObject, req)
+          .then((v) => {
+            assert.equal(false, v)
+          })
+      })
+      describe('roles functions return a promise', function () {
+        it('should work when combinedOptions roles function returns promise', function (done) {
+          routeOptions.roles = function (cbo) {
+            assert(cbo)
+            return new Promise((resolve) => {
+              setTimeout(function () {
+                resolve(['user'])
+              }, 1000)
+            })
+          }
+          callbackObject.roles = function (cbo) {
+            assert(cbo)
+            return ['user']
+          }
+          authorization.determineAuthorization(routeOptions, callbackObject, req)
+            .then((v) => {
+              assert.equal(true, v)
+              done()
+            })
+        })
+        it('should work when callbackObject roles function returns promise', function (done) {
+          routeOptions.roles = function (cbo) {
+            assert(cbo)
+            return ['user']
+          }
+          callbackObject.roles = function (cbo) {
+            assert(cbo)
+            return new Promise((resolve) => {
+              setTimeout(function () {
+                resolve(['user'])
+              }, 1000)
+            })
+          }
+          authorization.determineAuthorization(routeOptions, callbackObject, req)
+            .then((v) => {
+              assert.equal(true, v)
+              done()
+            })
+        })
+        it('should work when both roles functions return promises', function (done) {
+          routeOptions.roles = function (cbo) {
+            assert(cbo)
+            return new Promise((resolve) => {
+              setTimeout(function () {
+                resolve(['user'])
+              }, 900)
+            })
+          }
+          callbackObject.roles = function (cbo) {
+            assert(cbo)
+            return new Promise((resolve) => {
+              setTimeout(function () {
+                resolve(['user'])
+              }, 900)
+            })
+          }
+          authorization.determineAuthorization(routeOptions, callbackObject, req)
+            .then((v) => {
+              assert.equal(true, v)
+              done()
+            })
+        })
       })
     })
   })
