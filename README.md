@@ -3,9 +3,20 @@
 
 # hapi-acl-auth
 
-I didn't like how tightly coupled other `hapi` ACL authorization plugins were to authentication mechanisms, so I wrote my own that doesn't care what authentication mechanism that you use.
+I didn't like how tightly coupled other `hapi` ACL authorization plugins were to authentication mechanisms, so I wrote my own that doesn't care what authentication mechanism that you use, or even if you use an authentication mechanism at all (although that would be a bit dumb).
 
-Basically you just tell the plugin what roles a user has, what roles an endpoint allows (or every endpoint, by specifying the roles in the plugin config as opposed to each route), and you're set.
+Basically you just tell the plugin what roles a user has, what roles an endpoint allows, and you're set.
+
+Cool stuff that `hapi-acl-auth` gives you:
+
+* The ability to lock down the entire application, or just a few routes
+* Typical any/all functionality (allow if user has _any_ of these roles, allow if users has _all_ of these roles, for example)
+* Specifying a hierarchy of roles ("admins" are clearly "users" too, so let them through without explicitly letting "admins" through, for example)
+* The ability to have custom forbidden pages
+* Caching of roles for performance
+* [And so much more!](https://www.google.com/search?q=but+wait+there%27s+more&tbm=isch&tbo=u&source=univ&sa=X&ved=0ahUKEwiBjtj4tJvVAhXEPD4KHbPyCN4QsAQIJw&biw=1440&bih=776)
+
+Check out the [example](https://github.com/charlesread/hapi-acl-auth/tree/master/example) directory for examples!
 
 <!-- toc -->
 

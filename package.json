@@ -28,7 +28,7 @@
     "bluebird": "^3.5.0",
     "bluebird-co": "^2.2.0",
     "boom": "^5.1.0",
-    "deep-assign": "^2.0.0",
+    "deep-extend": "^0.5.0",
     "hapi": "^16.4.3",
     "joi": "^10.6.0",
     "lodash": "^4.17.4",
@@ -56,6 +56,7 @@
     "lint"
   ],
   "optionalDependencies": {
-    "hapi-auth-basic": "^4.2.0"
+    "hapi-auth-basic": "^4.2.0",
+    "marko": "^4.4.19"
   }
 }
