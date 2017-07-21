@@ -281,6 +281,112 @@ describe('integration testing', function () {
     )
   })
 
+  it('insecure endpoint should return 200 when policy is allow', function (done) {
+    server.register({
+        register: plugin,
+        options: {
+          handler: function (request, callback) {
+            callback(null, {username: 'cread', roles: ['USER', 'pizza']})
+          },
+          policy: 'allow'
+        }
+      },
+      function (err) {
+        if (err) throw err
+        server.route({
+          method,
+          path: '/notprotected',
+          handler: function (request, reply) {
+            return reply()
+          }
+        })
+        server.start(function (err) {
+          if (err) throw err
+          request({url: 'http://localhost:9999/notprotected', method},
+            function (err, httpResponse, body) {
+              if (err) throw err
+              httpResponse.statusCode.should.equal(200)
+              done()
+            }
+          )
+        })
+      }
+    )
+  })
+
+  it('insecure endpoint should return 403 when policy is deny', function (done) {
+    server.register({
+        register: plugin,
+        options: {
+          handler: function (request, callback) {
+            callback(null, {username: 'cread', roles: ['USER', 'pizza']})
+          },
+          policy: 'deny'
+        }
+      },
+      function (err) {
+        if (err) throw err
+        server.route({
+          method,
+          path: '/notprotected',
+          handler: function (request, reply) {
+            return reply()
+          }
+        })
+        server.start(function (err) {
+          if (err) throw err
+          request({url: 'http://localhost:9999/notprotected', method},
+            function (err, httpResponse, body) {
+              if (err) throw err
+              httpResponse.statusCode.should.equal(403)
+              done()
+            }
+          )
+        })
+      }
+    )
+  })
+
+  it('insecure endpoint should return 200 when policy is deny but route has secure as false', function (done) {
+    server.register({
+        register: plugin,
+        options: {
+          handler: function (request, callback) {
+            callback(null, {username: 'cread', roles: ['USER', 'pizza']})
+          },
+          policy: 'deny'
+        }
+      },
+      function (err) {
+        if (err) throw err
+        server.route({
+          method,
+          path: '/notprotected',
+          handler: function (request, reply) {
+            return reply()
+          },
+          config: {
+            plugins: {
+              hapiAclAuth: {
+                secure: false
+              }
+            }
+          }
+        })
+        server.start(function (err) {
+          if (err) throw err
+          request({url: 'http://localhost:9999/notprotected', method},
+            function (err, httpResponse, body) {
+              if (err) throw err
+              httpResponse.statusCode.should.equal(200)
+              done()
+            }
+          )
+        })
+      }
+    )
+  })
+
   it('when a hierarchy is used a higher privileged role should be able to access a route with a lower privileged role', function (done) {
     server.register({
         register: plugin,

@@ -245,7 +245,7 @@ describe('authorization.js', function () {
             return new Promise((resolve) => {
               setTimeout(function () {
                 resolve(['user'])
-              }, 1000)
+              }, 500)
             })
           }
           authorization.determineAuthorization(routeOptions, callbackObject, req)
@@ -260,7 +260,7 @@ describe('authorization.js', function () {
             return new Promise((resolve) => {
               setTimeout(function () {
                 resolve(['user'])
-              }, 900)
+              }, 500)
             })
           }
           callbackObject.roles = function (cbo) {
@@ -268,7 +268,7 @@ describe('authorization.js', function () {
             return new Promise((resolve) => {
               setTimeout(function () {
                 resolve(['user'])
-              }, 900)
+              }, 500)
             })
           }
           authorization.determineAuthorization(routeOptions, callbackObject, req)
