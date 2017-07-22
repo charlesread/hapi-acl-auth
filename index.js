@@ -4,32 +4,35 @@ const pjson = require('./package.json')
 
 const path = require('path')
 const Boom = require('boom')
+const debug = require('debug')('hapi-acl-auth:plugin')
 
 const options = require(path.join(__dirname, 'lib', 'options.js'))
 const authorization = require(path.join(__dirname, 'lib', 'authorization.js'))
 
 function plugin (server, opts, next) {
+  debug('opts:')
+  debug(opts)
   server.ext('onPreHandler', function (req, reply) {
+    debug('request for %s caught', req.path)
+    debug('req.auth.credentials:')
+    debug(req.auth.credentials)
     const {routeOptions, pluginOptions, combinedOptions} = options(req, opts)
     if ((pluginOptions.policy === 'deny' && combinedOptions.secure) || (pluginOptions.policy === 'allow' && routeOptions.secure)) {
       combinedOptions.handler(req, function (err, callbackObject) {
+        debug('callbackObject:')
+        debug(callbackObject)
         if (err) {
           throw err
         }
         authorization.determineAuthorization(combinedOptions, callbackObject, req)
           .then((isAuthorized) => {
+            debug('isAuthorized: %s', isAuthorized)
             if (!isAuthorized) {
               reply(combinedOptions.forbiddenPageFunction ? combinedOptions.forbiddenPageFunction(callbackObject) : Boom.forbidden())
             } else {
               reply.continue()
             }
           })
-        // const isAuthorized = authorization.determineAuthorization(combinedOptions, callbackObject, req)
-        // if (!isAuthorized) {
-        //   reply(combinedOptions.forbiddenPageFunction ? combinedOptions.forbiddenPageFunction(callbackObject) : Boom.forbidden())
-        // } else {
-        //   reply.continue()
-        // }
       })
     } else {
       reply.continue()
