@@ -22,6 +22,7 @@ Check out the [example](https://github.com/charlesread/hapi-acl-auth/tree/master
 
 - [Installation](#installation)
 - [Utilization](#utilization)
+- [Taglib](#taglib)
 - [Plugin/Route Configuration Options](#pluginroute-configuration-options)
   * [Plugin _and_ route options](#plugin-_and_-route-options)
   * [Plugin _only_ options](#plugin-_only_-options)
@@ -100,6 +101,10 @@ server.start((err) => {
   console.log('Server running at:', server.info.uri)
 })
 ```
+
+## Taglib
+
+If you're using Marko the [hapi-acl-auth-taglib](https://www.npmjs.com/package/hapi-acl-auth-taglib) can be for several tasks, including displaying or not displaying content in Marko templates.
 
 ## Plugin/Route Configuration Options
 
