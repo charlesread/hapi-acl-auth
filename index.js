@@ -12,7 +12,10 @@ const authorization = require(path.join(__dirname, 'lib', 'authorization.js'))
 function plugin (server, opts, next) {
   debug('opts:')
   debug(opts)
-  server.ext('onPreHandler', function (req, reply) {
+  server.ext('onPreResponse', function (req, reply) {
+    if (opts.requireAuthentication === false && req.auth.isAuthenticated === false) {
+      return reply.continue()
+    }
     debug('request for %s caught', req.path)
     debug('req.auth.credentials:')
     debug(req.auth.credentials)
