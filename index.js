@@ -13,10 +13,16 @@ function plugin (server, opts, next) {
   debug('opts:')
   debug(opts)
   server.ext('onPreResponse', function (req, reply) {
-    if (opts.requireAuthentication === false && req.auth.isAuthenticated === false) {
+    debug('request for %s caught', req.path)
+    if (opts.exempt && opts.exempt.includes(req.path)) {
+      debug('%s is exempt', req.path)
+      return reply.continue()
+    } else {
+      debug('%s is not exempt', req.path)
+    }
+    if (opts.allowUnauthenticated && !req.auth.isAuthenticated) {
       return reply.continue()
     }
-    debug('request for %s caught', req.path)
     debug('req.auth.credentials:')
     debug(req.auth.credentials)
     const {routeOptions, pluginOptions, combinedOptions} = options(req, opts)
