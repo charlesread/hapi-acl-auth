@@ -37,7 +37,10 @@ function plugin (server, opts, next) {
           .then((isAuthorized) => {
             debug('isAuthorized: %s', isAuthorized)
             if (!isAuthorized) {
-              reply(combinedOptions.forbiddenPageFunction ? combinedOptions.forbiddenPageFunction(callbackObject) : Boom.forbidden())
+              const result = combinedOptions.forbiddenPageFunction ? combinedOptions.forbiddenPageFunction(callbackObject, req, reply) : Boom.forbidden()
+              if (!combinedOptions.forbiddenPageFunction || (combinedOptions.forbiddenPageFunction && combinedOptions.forbiddenPageFunction.length === 1)) {
+                reply(result)
+              }
             } else {
               reply.continue()
             }
