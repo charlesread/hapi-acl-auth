@@ -79,6 +79,92 @@ describe('integration testing', function () {
     )
   })
 
+  it('secure endpoint should reply appropriately when forbiddenPageFunction uses reply', function (done) {
+    server.register({
+        register: plugin,
+        options: {
+          handler: function (request, callback) {
+            callback(null, {username: 'cread', roles: ['USER']})
+          },
+          forbiddenPageFunction: function (user, req, reply) {
+            reply().code(500)
+          }
+        }
+      },
+      function (err) {
+        if (err) throw err
+        server.route({
+          method,
+          path: '/protected',
+          config: {
+            plugins: {
+              hapiAclAuth: {
+                roles: ['ADMIN'],
+                secure: true
+              }
+            }
+          },
+          handler: function (request, reply) {
+            return reply('protected')
+          }
+        })
+        server.start(function (err) {
+          if (err) throw err
+          request({url, method},
+            function (err, httpResponse, body) {
+              if (err) throw err
+              httpResponse.statusCode.should.equal(500)
+              done()
+            }
+          )
+        })
+      }
+    )
+  })
+
+  it('secure endpoint should reply appropriately when forbiddenPageFunction does not use reply', function (done) {
+    server.register({
+        register: plugin,
+        options: {
+          handler: function (request, callback) {
+            callback(null, {username: 'cread', roles: ['USER']})
+          },
+          forbiddenPageFunction: function (user) {
+            return 'nope'
+          }
+        }
+      },
+      function (err) {
+        if (err) throw err
+        server.route({
+          method,
+          path: '/protected',
+          config: {
+            plugins: {
+              hapiAclAuth: {
+                roles: ['ADMIN'],
+                secure: true
+              }
+            }
+          },
+          handler: function (request, reply) {
+            return reply('protected')
+          }
+        })
+        server.start(function (err) {
+          if (err) throw err
+          request({url, method},
+            function (err, httpResponse, body) {
+              if (err) throw err
+              httpResponse.statusCode.should.equal(200)
+              done()
+            }
+          )
+        })
+      }
+    )
+  })
+
   it('secure endpoint should return 403 when no required route roles match any user roles', function (done) {
     server.register({
         register: plugin,
