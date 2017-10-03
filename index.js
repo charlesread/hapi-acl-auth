@@ -12,7 +12,7 @@ const authorization = require(path.join(__dirname, 'lib', 'authorization.js'))
 function plugin (server, opts, next) {
   debug('opts:')
   debug(opts)
-  server.ext('onPreResponse', function (req, reply) {
+  server.ext('onPostAuth', function (req, reply) {
     debug('request for %s caught', req.path)
     if (opts.exempt && opts.exempt.includes(req.path)) {
       debug('%s is exempt', req.path)
