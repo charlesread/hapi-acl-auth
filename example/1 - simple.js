@@ -22,10 +22,10 @@ server.connection({
 
 const plugins = [
   {
-    register: require('../index'),
+    plugin: require('../index'),
     options: {
-      handler: function (request, callback) {
-        callback(null, {username: 'cread', roles: ['admin']})
+      handler: async function (request) {
+        return {username: 'cread', roles: ['admin']}
       }
     }
   }
