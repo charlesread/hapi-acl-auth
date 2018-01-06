@@ -25,8 +25,7 @@
     "auth"
   ],
   "dependencies": {
-    "bluebird": "^3.5.0",
-    "bluebird-co": "^2.2.0",
+    "bluebird": "^3.5.1",
     "debug": "^3.1.0",
     "deep-extend": "^0.5.0",
     "joi": "^13.1.0",
