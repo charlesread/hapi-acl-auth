@@ -6,6 +6,7 @@ chai.should()
 
 const path = require('path')
 const Hapi = require('hapi')
+const boom = require('boom')
 const request = require('request')
 
 let server
@@ -335,16 +336,9 @@ describe('integration testing', function () {
       .then(function () {
         server.route({
           method: 'get',
-          path: '/protected',
-          config: {
-            plugins: {
-              hapiAclAuth: {
-                roles: ['USER', 'pizza', 'cheese']
-              }
-            }
-          },
-          handler: function (req, h) {
-            return 'protected'
+          path: '/insecure',
+          handler: async function (req, h) {
+            return 'insecure'
           }
         })
         return Promise.resolve()
@@ -353,7 +347,7 @@ describe('integration testing', function () {
         return server.start()
       })
       .then(function () {
-        request({url, method},
+        request({url: 'http://localhost:9999/insecure', method},
           function (err, httpResponse, body) {
             if (err) throw err
             httpResponse.statusCode.should.equal(200)
@@ -382,11 +376,445 @@ describe('integration testing', function () {
       .then(function () {
         server.route({
           method: 'get',
+          path: '/insecure',
+          handler: async function (req, h) {
+            return 'insecure'
+          }
+        })
+        return Promise.resolve()
+      })
+      .then(function () {
+        return server.start()
+      })
+      .then(function () {
+        request({url: 'http://localhost:9999/insecure', method},
+          function (err, httpResponse, body) {
+            if (err) throw err
+            httpResponse.statusCode.should.equal(403)
+            done()
+            return true
+          }
+        )
+      })
+      .catch(function (err) {
+        console.error(err.message)
+        console.error(err.stack)
+        if (err) throw err
+      })
+  })
+
+  it('insecure endpoint should return 200 when policy is deny but route has secure as false', function (done) {
+    server.register({
+      plugin: plugin,
+      options: {
+        handler: async function (req) {
+          return {username: 'cread', roles: ['USER', 'pizza']}
+        },
+        policy: 'deny'
+      }
+    })
+      .then(function () {
+        server.route({
+          method: 'get',
+          path: '/insecure',
+          config: {
+            plugins: {
+              hapiAclAuth: {
+                secure: false
+              }
+            }
+          },
+          handler: async function (req, h) {
+            return 'insecure'
+          }
+        })
+        return Promise.resolve()
+      })
+      .then(function () {
+        return server.start()
+      })
+      .then(function () {
+        request({url: 'http://localhost:9999/insecure', method},
+          function (err, httpResponse, body) {
+            if (err) throw err
+            httpResponse.statusCode.should.equal(200)
+            done()
+            return true
+          }
+        )
+      })
+      .catch(function (err) {
+        console.error(err.message)
+        console.error(err.stack)
+        if (err) throw err
+      })
+  })
+
+  it('when a hierarchy is used a higher privileged role should be able to access a route with a lower privileged role', function (done) {
+    server.register({
+      plugin: plugin,
+      options: {
+        handler: async function (req) {
+          return {username: 'cread', roles: ['ADMIN']}
+        },
+        hierarchy: ['USER', 'ADMIN', 'SUPERUSER']
+      }
+    })
+      .then(function () {
+        server.route({
+          method: 'get',
           path: '/protected',
           config: {
             plugins: {
               hapiAclAuth: {
-                roles: ['USER', 'pizza', 'cheese']
+                roles: ['USER']
+              }
+            }
+          },
+          handler: async function (req, h) {
+            return 'insecure'
+          }
+        })
+        return Promise.resolve()
+      })
+      .then(function () {
+        return server.start()
+      })
+      .then(function () {
+        request({url, method},
+          function (err, httpResponse, body) {
+            if (err) throw err
+            httpResponse.statusCode.should.equal(200)
+            done()
+            return true
+          }
+        )
+      })
+      .catch(function (err) {
+        console.error(err.message)
+        console.error(err.stack)
+        if (err) throw err
+      })
+  })
+
+  it('when a hierarchy is used a lower privileged role should NOT be able to access a route with a lower privileged role', function (done) {
+    server.register({
+      plugin: plugin,
+      options: {
+        handler: async function (req) {
+          return {username: 'cread', roles: ['USER']}
+        },
+        hierarchy: ['USER', 'ADMIN', 'SUPERUSER']
+      }
+    })
+      .then(function () {
+        server.route({
+          method: 'get',
+          path: '/protected',
+          config: {
+            plugins: {
+              hapiAclAuth: {
+                roles: ['ADMIN']
+              }
+            }
+          },
+          handler: async function (req, h) {
+            return 'insecure'
+          }
+        })
+        return Promise.resolve()
+      })
+      .then(function () {
+        return server.start()
+      })
+      .then(function () {
+        request({url, method},
+          function (err, httpResponse, body) {
+            if (err) throw err
+            httpResponse.statusCode.should.equal(403)
+            done()
+            return true
+          }
+        )
+      })
+      .catch(function (err) {
+        console.error(err.message)
+        console.error(err.stack)
+        if (err) throw err
+      })
+  })
+
+  it('if policy is set to allow then a route with no config should not be secure, even if other options should deny (if not overridden in route)', function (done) {
+    server.register({
+      plugin: plugin,
+      options: {
+        handler: async function (req) {
+          return {username: 'cread', roles: ['USER']}
+        },
+        hierarchy: ['USER', 'ADMIN', 'SUPERUSER'],
+        policy: 'allow'
+      }
+    })
+      .then(function () {
+        server.route({
+          method: 'get',
+          path: '/protected',
+          config: {
+            plugins: {
+              hapiAclAuth: {
+                roles: ['ADMIN'],
+                // if  secure: true the test should fail
+              }
+            }
+          },
+          handler: async function (req, h) {
+            return 'insecure'
+          }
+        })
+        return Promise.resolve()
+      })
+      .then(function () {
+        return server.start()
+      })
+      .then(function () {
+        request({url, method},
+          function (err, httpResponse, body) {
+            if (err) throw err
+            httpResponse.statusCode.should.equal(200)
+            done()
+            return true
+          }
+        )
+      })
+      .catch(function (err) {
+        console.error(err.message)
+        console.error(err.stack)
+        if (err) throw err
+      })
+  })
+
+  it('if policy is set to allow then a route with no config should be secure if secure: true is in route config: user does NOT have appropriate role', function (done) {
+    server.register({
+      plugin: plugin,
+      options: {
+        handler: async function (req) {
+          return {username: 'cread', roles: ['USER']}
+        },
+        hierarchy: ['USER', 'ADMIN', 'SUPERUSER'],
+        policy: 'allow'
+      }
+    })
+      .then(function () {
+        server.route({
+          method: 'get',
+          path: '/protected',
+          config: {
+            plugins: {
+              hapiAclAuth: {
+                roles: ['ADMIN'],
+                secure: true
+              }
+            }
+          },
+          handler: async function (req, h) {
+            return 'insecure'
+          }
+        })
+        return Promise.resolve()
+      })
+      .then(function () {
+        return server.start()
+      })
+      .then(function () {
+        request({url, method},
+          function (err, httpResponse, body) {
+            if (err) throw err
+            httpResponse.statusCode.should.equal(403)
+            done()
+            return true
+          }
+        )
+      })
+      .catch(function (err) {
+        console.error(err.message)
+        console.error(err.stack)
+        if (err) throw err
+      })
+  })
+
+  it('if policy is set to allow then a route with no config should be secure if secure: true is in route config: user DOES have appropriate role', function (done) {
+    server.register({
+      plugin: plugin,
+      options: {
+        handler: async function (req) {
+          return {username: 'cread', roles: ['USER']}
+        },
+        hierarchy: ['USER', 'ADMIN', 'SUPERUSER'],
+        policy: 'allow'
+      }
+    })
+      .then(function () {
+        server.route({
+          method: 'get',
+          path: '/protected',
+          config: {
+            plugins: {
+              hapiAclAuth: {
+                roles: ['SUPERUSER'],
+                secure: true
+              }
+            }
+          },
+          handler: async function (req, h) {
+            return 'insecure'
+          }
+        })
+        return Promise.resolve()
+      })
+      .then(function () {
+        return server.start()
+      })
+      .then(function () {
+        request({url, method},
+          function (err, httpResponse, body) {
+            if (err) throw err
+            httpResponse.statusCode.should.equal(403)
+            done()
+            return true
+          }
+        )
+      })
+      .catch(function (err) {
+        console.error(err.message)
+        console.error(err.stack)
+        if (err) throw err
+      })
+  })
+
+
+  it('enabling the cache shouldn\'t kill everything', function (done) {
+    server.register({
+      plugin: plugin,
+      options: {
+        handler: async function (req) {
+          return {username: 'cread', roles: ['USER']}
+        },
+        hierarchy: ['USER', 'ADMIN', 'SUPERUSER'],
+        policy: 'allow',
+        cache: true
+      }
+    })
+      .then(function () {
+        server.route({
+          method: 'get',
+          path: '/protected',
+          config: {
+            plugins: {
+              hapiAclAuth: {
+                roles: ['SUPERUSER'],
+                secure: true
+              }
+            }
+          },
+          handler: async function (req, h) {
+            return 'insecure'
+          }
+        })
+        return Promise.resolve()
+      })
+      .then(function () {
+        return server.start()
+      })
+      .then(function () {
+        request({url, method},
+          function (err, httpResponse, body) {
+            if (err) throw err
+            httpResponse.statusCode.should.equal(403)
+            done()
+            return true
+          }
+        )
+      })
+      .catch(function (err) {
+        console.error(err.message)
+        console.error(err.stack)
+        if (err) throw err
+      })
+  })
+
+  it('if cache is enabled it should contain a cached path object', function (done) {
+    server.register({
+      plugin: plugin,
+      options: {
+        handler: async function (req) {
+          return {username: 'cread', roles: ['USER']}
+        },
+        hierarchy: ['USER', 'ADMIN', 'SUPERUSER'],
+        policy: 'allow',
+        cache: true
+      }
+    })
+      .then(function () {
+        server.route({
+          method: 'get',
+          path: '/protected',
+          config: {
+            plugins: {
+              hapiAclAuth: {
+                roles: ['SUPERUSER'],
+                secure: true
+              }
+            }
+          },
+          handler: async function (req, h) {
+            return 'insecure'
+          }
+        })
+        return Promise.resolve()
+      })
+      .then(function () {
+        return server.start()
+      })
+      .then(function () {
+        request({url, method},
+          function (err, httpResponse, body) {
+            if (err) throw err
+            httpResponse.statusCode.should.equal(403)
+            cache.get('/protected').should.have.own.property('allowed')
+            cache.get('/protected').should.have.own.property('actual')
+            done()
+            return true
+          }
+        )
+      })
+      .catch(function (err) {
+        console.error(err.message)
+        console.error(err.stack)
+        if (err) throw err
+      })
+  })
+
+  it('secure endpoint should return 403 when required route role does not match user role and forbiddenPageFunction returns a 403 Boom', function (done) {
+    server.register({
+      plugin: plugin,
+      options: {
+        handler: async function (req) {
+          return {username: 'cread', roles: ['USER']}
+        },
+        forbiddenPageFunction: async function (credentials, req, h) {
+          return boom.forbidden()
+        }
+      }
+    })
+      .then(function () {
+        server.route({
+          method: 'get',
+          path: '/protected',
+          config: {
+            plugins: {
+              hapiAclAuth: {
+                roles: ['ADMIN'],
+                secure: true
               }
             }
           },
@@ -416,463 +844,56 @@ describe('integration testing', function () {
       })
   })
 
-//
-// it('secure endpoint should reply appropriately when forbiddenPageFunction uses reply', function (done) {
-//   server.register({
-//       register: plugin,
-//       options: {
-//         handler: function (request, callback) {
-//           callback(null, {username: 'cread', roles: ['USER']})
-//         },
-//         forbiddenPageFunction: function (user, req, reply) {
-//           reply().code(500)
-//         }
-//       }
-//     },
-//     function (err) {
-//       if (err) throw err
-//       server.route({
-//         method,
-//         path: '/protected',
-//         config: {
-//           plugins: {
-//             hapiAclAuth: {
-//               roles: ['ADMIN'],
-//               secure: true
-//             }
-//           }
-//         },
-//         handler: function (request, reply) {
-//           return reply('protected')
-//         }
-//       })
-//       server.start(function (err) {
-//         if (err) throw err
-//         request({url, method},
-//           function (err, httpResponse, body) {
-//             if (err) throw err
-//             httpResponse.statusCode.should.equal(500)
-//             done()
-//           }
-//         )
-//       })
-//     }
-//   )
-// })
-//
-// it('secure endpoint should reply appropriately when forbiddenPageFunction does not use reply', function (done) {
-//   server.register({
-//       register: plugin,
-//       options: {
-//         handler: function (request, callback) {
-//           callback(null, {username: 'cread', roles: ['USER']})
-//         },
-//         forbiddenPageFunction: function (user) {
-//           return 'nope'
-//         }
-//       }
-//     },
-//     function (err) {
-//       if (err) throw err
-//       server.route({
-//         method,
-//         path: '/protected',
-//         config: {
-//           plugins: {
-//             hapiAclAuth: {
-//               roles: ['ADMIN'],
-//               secure: true
-//             }
-//           }
-//         },
-//         handler: function (request, reply) {
-//           return reply('protected')
-//         }
-//       })
-//       server.start(function (err) {
-//         if (err) throw err
-//         request({url, method},
-//           function (err, httpResponse, body) {
-//             if (err) throw err
-//             httpResponse.statusCode.should.equal(200)
-//             done()
-//           }
-//         )
-//       })
-//     }
-//   )
-// })
-//
-
-
-//
-// it('insecure endpoint should return 403 when policy is deny', function (done) {
-//   server.register({
-//       register: plugin,
-//       options: {
-//         handler: function (request, callback) {
-//           callback(null, {username: 'cread', roles: ['USER', 'pizza']})
-//         },
-//         policy: 'deny'
-//       }
-//     },
-//     function (err) {
-//       if (err) throw err
-//       server.route({
-//         method,
-//         path: '/notprotected',
-//         handler: function (request, reply) {
-//           return reply()
-//         }
-//       })
-//       server.start(function (err) {
-//         if (err) throw err
-//         request({url: 'http://localhost:9999/notprotected', method},
-//           function (err, httpResponse, body) {
-//             if (err) throw err
-//             httpResponse.statusCode.should.equal(403)
-//             done()
-//           }
-//         )
-//       })
-//     }
-//   )
-// })
-//
-// it('insecure endpoint should return 200 when policy is deny but route has secure as false', function (done) {
-//   server.register({
-//       register: plugin,
-//       options: {
-//         handler: function (request, callback) {
-//           callback(null, {username: 'cread', roles: ['USER', 'pizza']})
-//         },
-//         policy: 'deny'
-//       }
-//     },
-//     function (err) {
-//       if (err) throw err
-//       server.route({
-//         method,
-//         path: '/notprotected',
-//         handler: function (request, reply) {
-//           return reply()
-//         },
-//         config: {
-//           plugins: {
-//             hapiAclAuth: {
-//               secure: false
-//             }
-//           }
-//         }
-//       })
-//       server.start(function (err) {
-//         if (err) throw err
-//         request({url: 'http://localhost:9999/notprotected', method},
-//           function (err, httpResponse, body) {
-//             if (err) throw err
-//             httpResponse.statusCode.should.equal(200)
-//             done()
-//           }
-//         )
-//       })
-//     }
-//   )
-// })
-//
-// it('when a hierarchy is used a higher privileged role should be able to access a route with a lower privileged role', function (done) {
-//   server.register({
-//       register: plugin,
-//       options: {
-//         handler: function (request, callback) {
-//           callback(null, {username: 'cread', roles: ['ADMIN']})
-//         },
-//         hierarchy: ['USER', 'ADMIN', 'SUPERUSER']
-//       }
-//     },
-//     function (err) {
-//       if (err) throw err
-//       server.route({
-//         method,
-//         path: '/protected',
-//         config: {
-//           plugins: {
-//             hapiAclAuth: {
-//               roles: ['USER'],
-//               secure: true
-//             }
-//           }
-//         },
-//         handler: function (request, reply) {
-//           return reply('protected')
-//         }
-//       })
-//       server.start(function (err) {
-//         if (err) throw err
-//         request({url, method},
-//           function (err, httpResponse, body) {
-//             if (err) throw err
-//             httpResponse.statusCode.should.equal(200)
-//             done()
-//           }
-//         )
-//       })
-//     }
-//   )
-// })
-//
-// it('when a hierarchy is used a lower privileged role should NOT be able to access a route with a higher privileged role', function (done) {
-//   server.register({
-//       register: plugin,
-//       options: {
-//         handler: function (request, callback) {
-//           callback(null, {username: 'cread', roles: ['USER']})
-//         },
-//         hierarchy: ['USER', 'ADMIN', 'SUPERUSER']
-//       }
-//     },
-//     function (err) {
-//       if (err) throw err
-//       server.route({
-//         method,
-//         path: '/protected',
-//         config: {
-//           plugins: {
-//             hapiAclAuth: {
-//               roles: ['ADMIN'],
-//               secure: true
-//             }
-//           }
-//         },
-//         handler: function (request, reply) {
-//           return reply('protected')
-//         }
-//       })
-//       server.start(function (err) {
-//         if (err) throw err
-//         request({url, method},
-//           function (err, httpResponse, body) {
-//             if (err) throw err
-//             httpResponse.statusCode.should.equal(403)
-//             done()
-//           }
-//         )
-//       })
-//     }
-//   )
-// })
-//
-// it('if policy is set to allow then a route with no config should not be secure, even if other options should deny (if not overridden in route)', function (done) {
-//   server.register({
-//       register: plugin,
-//       options: {
-//         handler: function (request, callback) {
-//           callback(null, {username: 'cread', roles: ['USER']})
-//         },
-//         hierarchy: ['USER', 'ADMIN', 'SUPERUSER'],
-//         policy: 'allow'
-//       }
-//     },
-//     function (err) {
-//       if (err) throw err
-//       server.route({
-//         method,
-//         path: '/protected',
-//         config: {
-//           plugins: {
-//             hapiAclAuth: {
-//               roles: ['ADMIN']
-//               // if  secure: true the test should fail
-//             }
-//           }
-//         },
-//         handler: function (request, reply) {
-//           return reply('protected')
-//         }
-//       })
-//       server.start(function (err) {
-//         if (err) throw err
-//         request({url, method},
-//           function (err, httpResponse, body) {
-//             if (err) throw err
-//             httpResponse.statusCode.should.equal(200)
-//             done()
-//           }
-//         )
-//       })
-//     }
-//   )
-// })
-//
-// it('if policy is set to allow then a route with no config should be secure if secure: true is in route config: user does NOT have appropriate role', function (done) {
-//   server.register({
-//       register: plugin,
-//       options: {
-//         handler: function (request, callback) {
-//           callback(null, {username: 'cread', roles: ['USER']})
-//         },
-//         hierarchy: ['USER', 'ADMIN', 'SUPERUSER'],
-//         policy: 'allow'
-//       }
-//     },
-//     function (err) {
-//       if (err) throw err
-//       server.route({
-//         method,
-//         path: '/protected',
-//         config: {
-//           plugins: {
-//             hapiAclAuth: {
-//               roles: ['ADMIN'],
-//               secure: true
-//             }
-//           }
-//         },
-//         handler: function (request, reply) {
-//           return reply('protected')
-//         }
-//       })
-//       server.start(function (err) {
-//         if (err) throw err
-//         request({url, method},
-//           function (err, httpResponse, body) {
-//             if (err) throw err
-//             httpResponse.statusCode.should.equal(403)
-//             done()
-//           }
-//         )
-//       })
-//     }
-//   )
-// })
-//
-// it('if policy is set to allow then a route with no config should be secure if secure: true is in route config: user DOES have appropriate role', function (done) {
-//   server.register({
-//       register: plugin,
-//       options: {
-//         handler: function (request, callback) {
-//           callback(null, {username: 'cread', roles: ['SUPERUSER']})
-//         },
-//         hierarchy: ['USER', 'ADMIN', 'SUPERUSER'],
-//         policy: 'allow'
-//       }
-//     },
-//     function (err) {
-//       if (err) throw err
-//       server.route({
-//         method,
-//         path: '/protected',
-//         config: {
-//           plugins: {
-//             hapiAclAuth: {
-//               roles: ['ADMIN'],
-//               secure: true
-//             }
-//           }
-//         },
-//         handler: function (request, reply) {
-//           return reply('protected')
-//         }
-//       })
-//       server.start(function (err) {
-//         if (err) throw err
-//         request({url, method},
-//           function (err, httpResponse, body) {
-//             if (err) throw err
-//             httpResponse.statusCode.should.equal(200)
-//             done()
-//           }
-//         )
-//       })
-//     }
-//   )
-// })
-//
-// it('enabling the cache shouldn\'t kill everything', function (done) {
-//   server.register({
-//       register: plugin,
-//       options: {
-//         handler: function (request, callback) {
-//           callback(null, {username: 'cread', roles: ['SUPERUSER']})
-//         },
-//         hierarchy: ['USER', 'ADMIN', 'SUPERUSER'],
-//         policy: 'allow',
-//         cache: true
-//       }
-//     },
-//     function (err) {
-//       if (err) throw err
-//       server.route({
-//         method,
-//         path: '/protected',
-//         config: {
-//           plugins: {
-//             hapiAclAuth: {
-//               roles: ['ADMIN'],
-//               secure: true
-//             }
-//           }
-//         },
-//         handler: function (request, reply) {
-//           return reply('protected')
-//         }
-//       })
-//       server.start(function (err) {
-//         if (err) throw err
-//         request({url, method},
-//           function (err, httpResponse, body) {
-//             if (err) throw err
-//             httpResponse.statusCode.should.equal(200)
-//             done()
-//           }
-//         )
-//       })
-//     }
-//   )
-// })
-//
-// it('if cache is enabled it should contain a cached path object', function (done) {
-//   server.register({
-//       register: plugin,
-//       options: {
-//         handler: function (request, callback) {
-//           callback(null, {username: 'cread', roles: ['SUPERUSER']})
-//         },
-//         hierarchy: ['USER', 'ADMIN', 'SUPERUSER'],
-//         policy: 'allow',
-//         cache: true
-//       }
-//     },
-//     function (err) {
-//       if (err) throw err
-//       server.route({
-//         method,
-//         path: '/protected',
-//         config: {
-//           plugins: {
-//             hapiAclAuth: {
-//               roles: ['ADMIN'],
-//               secure: true
-//             }
-//           }
-//         },
-//         handler: function (request, reply) {
-//           return reply('protected')
-//         }
-//       })
-//       server.start(function (err) {
-//         if (err) throw err
-//         request({url, method},
-//           function (err, httpResponse, body) {
-//             if (err) throw err
-//             cache.get('/protected').should.have.own.property('allowed')
-//             cache.get('/protected').should.have.own.property('actual')
-//             httpResponse.statusCode.should.equal(200)
-//             done()
-//           }
-//         )
-//       })
-//     }
-//   )
-// })
+  it('secure endpoint should return 407 when required route role does not match user role and forbiddenPageFunction returns a 407 response', function (done) {
+    server.register({
+      plugin: plugin,
+      options: {
+        handler: async function (req) {
+          return {username: 'cread', roles: ['USER']}
+        },
+        forbiddenPageFunction: async function (credentials, req, h) {
+          const response = h.response()
+          response.code(407)
+          return response.takeover()
+        }
+      }
+    })
+      .then(function () {
+        server.route({
+          method: 'get',
+          path: '/protected',
+          config: {
+            plugins: {
+              hapiAclAuth: {
+                roles: ['ADMIN'],
+                secure: true
+              }
+            }
+          },
+          handler: function (req, h) {
+            return 'protected'
+          }
+        })
+        return Promise.resolve()
+      })
+      .then(function () {
+        return server.start()
+      })
+      .then(function () {
+        request({url, method},
+          function (err, httpResponse, body) {
+            if (err) throw err
+            httpResponse.statusCode.should.equal(407)
+            done()
+            return true
+          }
+        )
+      })
+      .catch(function (err) {
+        console.error(err.message)
+        console.error(err.stack)
+        if (err) throw err
+      })
+  })
 
 })

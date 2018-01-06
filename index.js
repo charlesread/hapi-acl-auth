@@ -31,22 +31,25 @@ plugin.register = async function (server, opts) {
       debug(req.auth.credentials)
       const {routeOptions, pluginOptions, combinedOptions} = options(req, opts)
       if ((pluginOptions.policy === 'deny' && combinedOptions.secure) || (pluginOptions.policy === 'allow' && routeOptions.secure)) {
+        debug('policy if statement has evaluated to true')
         const callbackObject = await combinedOptions.handler(req)//, function (err, callbackObject) {
         debug('callbackObject:')
         debug(callbackObject)
         const isAuthorized = await authorization.determineAuthorization(combinedOptions, callbackObject, req)
         debug('isAuthorized: %s', isAuthorized)
         if (!isAuthorized) {
-          const forbiddenResult = combinedOptions.forbiddenPageFunction ? combinedOptions.forbiddenPageFunction(callbackObject, req, reply) : Boom.forbidden()
-          if (!combinedOptions.forbiddenPageFunction || (combinedOptions.forbiddenPageFunction && combinedOptions.forbiddenPageFunction.length === 1)) {
+          const forbiddenResult = combinedOptions.forbiddenPageFunction ? combinedOptions.forbiddenPageFunction(callbackObject, req, h) : Boom.forbidden()
+          if (forbiddenResult && forbiddenResult.then) {
+            result = await forbiddenResult
+          } else {
             result = forbiddenResult
           }
         } else {
           result = h.continue
         }
       } else {
+        debug('policy if statement has evaluated to false')
         result = h.continue
-        return
       }
     } catch (e) {
       throw e
