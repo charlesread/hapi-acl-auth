@@ -1,6 +1,10 @@
 [![Build Status](https://travis-ci.org/charlesread/hapi-acl-auth.svg?branch=master)](https://travis-ci.org/charlesread/hapi-acl-auth)
 [![Coverage Status](https://coveralls.io/repos/github/charlesread/hapi-acl-auth/badge.svg?branch=master)](https://coveralls.io/github/charlesread/hapi-acl-auth?branch=master)
 
+<strong>
+    Note: most examples in the examples directory are for previous versions, although the logic will still be the same, they will not work with versions 1.x of the plugin.
+</strong>
+
 # hapi-acl-auth
 
 I didn't like how tightly coupled other `hapi` ACL authorization plugins were to authentication mechanisms, so I wrote my own that doesn't care what authentication mechanism that you use, or even if you use an authentication mechanism at all (although that would be a bit dumb).
@@ -22,7 +26,8 @@ Check out the [example](https://github.com/charlesread/hapi-acl-auth/tree/master
 
 - [Installation](#installation)
 - [Utilization](#utilization)
-- [Taglib](#taglib)
+- [Change Log](#change-log)
+  * [1.0.x](#10x)
 - [Plugin/Route Configuration Options](#pluginroute-configuration-options)
   * [Plugin _and_ route options](#plugin-_and_-route-options)
   * [Plugin _only_ options](#plugin-_only_-options)
@@ -41,70 +46,92 @@ npm i -S hapi-acl-auth
 ```js
 'use strict'
 
+/*
+
+ Simple example.
+
+ Policy is `deny`, by default.
+ User has one role ('admin').
+ User has role required by /admin.
+ User does not have role required by /superuser.
+ Endpoint /notsecure has secure: false, thus overriding the default deny policy.
+
+ */
+
 const Hapi = require('hapi')
 
-const server = new Hapi.Server()
-server.connection({
+const server = Hapi.server({
   host: 'localhost',
   port: 8000
 })
 
-const plugins = [
-  {
-    register: require('hapi-acl-auth'),
+!async function () {
+  await server.register({
+    plugin: require('hapi-acl-auth'),
     options: {
-      handler: function (request, callback) {
-        // callback(err, obj) takes an error object and an arbitrary object, although
-        // this object must contain a `roles` attribute that contains an array of
-        // roles, or a function that returns an array of roles or returns a promise
-        // that resolves an array of roles, that are possessed by the user
-        callback(null, {username: 'cread', roles: ['SUPERUSER']})
+      handler: async function () {
+        return {user: 'creaed', roles: ['admin']}
       }
     }
-  }
-]
-
-server.register(
-  plugins,
-  function (err) {
-    if (err) {
-      throw err
-    }
-    server.route({
-      method: 'GET',
-      path: '/protected',
-      config: {
-        plugins: {
-          hapiAclAuth: {
-            roles: ['ADMIN', 'SUPERUSER']
-          }
-        }
-      },
-      handler: function (request, reply) {
-        return reply('protected')
-      }
-    })
-
-    server.route({
-      method: 'GET',
-      path: '/notprotected',
-      handler: function (request, reply) {
-        return reply('notprotected')
-      }
-    })
   })
-
-server.start((err) => {
-  if (err) {
-    throw err
-  }
-  console.log('Server running at:', server.info.uri)
-})
+  server.route({
+    method: 'get',
+    path: '/admin',
+    handler: async function (request, h) {
+      return '<h1>Welcome to /admin!</h1>'
+    },
+    config: {
+      plugins: {
+        hapiAclAuth: {
+          roles: ['admin']
+        }
+      }
+    }
+  })
+  server.route({
+    method: 'get',
+    path: '/superuser',
+    handler: async function (request, h) {
+      return '<h1>Welcome to /superuser!</h1>'
+    },
+    config: {
+      plugins: {
+        hapiAclAuth: {
+          roles: ['superuser']
+        }
+      }
+    }
+  })
+  server.route({
+    method: 'get',
+    path: '/notsecure',
+    handler: async function (request, h) {
+      return '<h1>Welcome to /notsecure!</h1>'
+    },
+    config: {
+      plugins: {
+        hapiAclAuth: {
+          secure: false
+        }
+      }
+    }
+  })
+  await server.start()
+}()
+  .then(function () {
+    console.log('server started: %s', server.info.uri)
+  })
+  .catch(function (err) {
+    console.error(err.message)
+  })
 ```
 
-## Taglib
+## Change Log
 
-If you're using Marko the [hapi-acl-auth-taglib](https://www.npmjs.com/package/hapi-acl-auth-taglib) can be for several tasks, including displaying or not displaying content in Marko templates.
+### 1.0.x
+* `hapi-acl-auth` is now fully compatible with Hapi version 17 and above
+* All `function`s have been replaced with `async functions`
+* If you need Hapi version 16 support see the 0.x releases
 
 ## Plugin/Route Configuration Options
 

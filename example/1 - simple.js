@@ -14,79 +14,67 @@
 
 const Hapi = require('hapi')
 
-const server = new Hapi.Server()
-server.connection({
+const server = Hapi.server({
   host: 'localhost',
   port: 8000
 })
 
-const plugins = [
-  {
-    plugin: require('../index'),
+!async function () {
+  await server.register({
+    plugin: require('hapi-acl-auth'),
     options: {
-      handler: async function (request) {
-        return {username: 'cread', roles: ['admin']}
+      handler: async function () {
+        return {user: 'creaed', roles: ['admin']}
       }
     }
-  }
-]
-
-server.register(
-  plugins,
-  function (err) {
-    if (err) {
-      throw err
-    }
-
-    server.route({
-      method: 'GET',
-      path: '/admin',
-      handler: function (request, reply) {
-        return reply('admin')
-      },
-      config: {
-        plugins: {
-          hapiAclAuth: {
-            roles: ['admin']
-          }
-        }
-      }
-    })
-
-    server.route({
-      method: 'GET',
-      path: '/superuser',
-      handler: function (request, reply) {
-        return reply('superuser')
-      },
-      config: {
-        plugins: {
-          hapiAclAuth: {
-            roles: ['superuser']
-          }
-        }
-      }
-    })
-
-    server.route({
-      method: 'GET',
-      path: '/notsecure',
-      config: {
-        plugins: {
-          hapiAclAuth: {
-            secure: false
-          }
-        }
-      },
-      handler: function (request, reply) {
-        return reply('notsecure')
-      }
-    })
   })
-
-server.start((err) => {
-  if (err) {
-    throw err
-  }
-  console.log('Server running at:', server.info.uri)
-})
+  server.route({
+    method: 'get',
+    path: '/admin',
+    handler: async function (request, h) {
+      return '<h1>Welcome to /admin!</h1>'
+    },
+    config: {
+      plugins: {
+        hapiAclAuth: {
+          roles: ['admin']
+        }
+      }
+    }
+  })
+  server.route({
+    method: 'get',
+    path: '/superuser',
+    handler: async function (request, h) {
+      return '<h1>Welcome to /superuser!</h1>'
+    },
+    config: {
+      plugins: {
+        hapiAclAuth: {
+          roles: ['superuser']
+        }
+      }
+    }
+  })
+  server.route({
+    method: 'get',
+    path: '/notsecure',
+    handler: async function (request, h) {
+      return '<h1>Welcome to /notsecure!</h1>'
+    },
+    config: {
+      plugins: {
+        hapiAclAuth: {
+          secure: false
+        }
+      }
+    }
+  })
+  await server.start()
+}()
+  .then(function () {
+    console.log('server started: %s', server.info.uri)
+  })
+  .catch(function (err) {
+    console.error(err.message)
+  })
