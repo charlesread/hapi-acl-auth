@@ -19,7 +19,7 @@ const server = Hapi.server({
   port: 8000
 })
 
-!async function () {
+;(async function () {
   await server.register({
     plugin: require('hapi-acl-auth'),
     options: {
@@ -71,7 +71,7 @@ const server = Hapi.server({
     }
   })
   await server.start()
-}()
+})()
   .then(function () {
     console.log('server started: %s', server.info.uri)
   })
