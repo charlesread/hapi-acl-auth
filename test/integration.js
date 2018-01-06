@@ -497,53 +497,6 @@ describe('integration testing', function () {
       })
   })
 
-  it('when a hierarchy is used a lower privileged role should NOT be able to access a route with a lower privileged role', function (done) {
-    server.register({
-      plugin: plugin,
-      options: {
-        handler: async function (req) {
-          return {username: 'cread', roles: ['USER']}
-        },
-        hierarchy: ['USER', 'ADMIN', 'SUPERUSER']
-      }
-    })
-      .then(function () {
-        server.route({
-          method: 'get',
-          path: '/protected',
-          config: {
-            plugins: {
-              hapiAclAuth: {
-                roles: ['ADMIN']
-              }
-            }
-          },
-          handler: async function (req, h) {
-            return 'insecure'
-          }
-        })
-        return Promise.resolve()
-      })
-      .then(function () {
-        return server.start()
-      })
-      .then(function () {
-        request({url, method},
-          function (err, httpResponse, body) {
-            if (err) throw err
-            httpResponse.statusCode.should.equal(403)
-            done()
-            return true
-          }
-        )
-      })
-      .catch(function (err) {
-        console.error(err.message)
-        console.error(err.stack)
-        if (err) throw err
-      })
-  })
-
   it('if policy is set to allow then a route with no config should not be secure, even if other options should deny (if not overridden in route)', function (done) {
     server.register({
       plugin: plugin,
@@ -581,6 +534,54 @@ describe('integration testing', function () {
           function (err, httpResponse, body) {
             if (err) throw err
             httpResponse.statusCode.should.equal(200)
+            done()
+            return true
+          }
+        )
+      })
+      .catch(function (err) {
+        console.error(err.message)
+        console.error(err.stack)
+        if (err) throw err
+      })
+  })
+
+
+  it('when a hierarchy is used a lower privileged role should NOT be able to access a route with a lower privileged role', function (done) {
+    server.register({
+      plugin: plugin,
+      options: {
+        handler: async function (req) {
+          return {username: 'cread', roles: ['USER']}
+        },
+        hierarchy: ['USER', 'ADMIN', 'SUPERUSER']
+      }
+    })
+      .then(function () {
+        server.route({
+          method: 'get',
+          path: '/protected',
+          config: {
+            plugins: {
+              hapiAclAuth: {
+                roles: ['ADMIN']
+              }
+            }
+          },
+          handler: async function (req, h) {
+            return 'insecure'
+          }
+        })
+        return Promise.resolve()
+      })
+      .then(function () {
+        return server.start()
+      })
+      .then(function () {
+        request({url, method},
+          function (err, httpResponse, body) {
+            if (err) throw err
+            httpResponse.statusCode.should.equal(403)
             done()
             return true
           }
