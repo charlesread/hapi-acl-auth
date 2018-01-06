@@ -130,7 +130,7 @@ const server = Hapi.server({
 
 ### 1.0.x
 * `hapi-acl-auth` is now fully compatible with Hapi version 17 and above
-* All `function`s have been replaced with `async functions`
+* All `function`s have been replaced with `async function`s
 * If you need Hapi version 16 support see the 0.x releases
 
 ## Plugin/Route Configuration Options
@@ -142,7 +142,7 @@ Most options can be specified at the plugin level, or for each individual route.
 | Name | Type | Default | Allowed Values | Description |
 | --- | --- | --- | --- | --- |
 | handler (required) | `[async] function(request)` |  |  | This function must return an object (referred to as `handlerObject` henceforth), the object can be arbitrary, but it must contain a `roles` attribute that is an Array (or a function that returns an array) of roles that are allowed for the route (or routes, if configured in the plugin options).|
-| roles (required) | `Array`&#124;`[async] function(handlerObject)` |  |  | An `Array` of roles (or an `[async] function` that returns an array of roles) that are allowed for the route or routes.  *NOTE*: this attribute can be set at the plugin or route level, if it is set at the plugin level it will apply to _all_ routes, if set on an individual route it only applies to that route, but you can set a "policy" at the plugin level and then override it in individual routes should you so desire. |
+| roles (required) | `Array`&#124;`[async] function(handlerObject, request)` |  |  | An `Array` of roles (or an `[async] function` that returns an array of roles) that are allowed for the route or routes.  *NOTE*: this attribute can be set at the plugin or route level, if it is set at the plugin level it will apply to _all_ routes, if set on an individual route it only applies to that route, but you can set a "policy" at the plugin level and then override it in individual routes should you so desire. |
 | any | `Boolean` | `true` | `true`&#124;`false` | Apecifies whether a user may possess _any_ of the allowed roles in order to be authorized. |
 | all | `Boolean` | `false` | `true`&#124;`false` | Apecifies whether a user _must_ possess _all_ of the allowed routes in order to be authorized. |
 | hierarchy | `Array` |  |  | An `Array` that specifies the privilege hierarchy of roles in order of ascending privilege.  For instance, suppose we have  `hierarchy: ['user', 'admin', 'superuser]` configured for a route and `roles: ['admin']` configured for that same route.  A user with the `superuser` role will be able to access that route because the `superuser` role is of higher privilege than the `admin` role, as specified in the hierarchy. |
