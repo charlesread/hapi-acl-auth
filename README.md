@@ -1,5 +1,4 @@
 [![Build Status](https://travis-ci.org/charlesread/hapi-acl-auth.svg?branch=master)](https://travis-ci.org/charlesread/hapi-acl-auth)
-[![Coverage Status](https://coveralls.io/repos/github/charlesread/hapi-acl-auth/badge.svg?branch=master)](https://coveralls.io/github/charlesread/hapi-acl-auth?branch=master)
 
 <strong>
     Note: most examples in the examples directory are for previous versions, although the logic will still be the same, they will not work with versions 1.x of the plugin.
