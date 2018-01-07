@@ -70,7 +70,16 @@ const server = Hapi.server({
     plugin: require('hapi-acl-auth'),
     options: {
       handler: async function () {
-        return {user: 'creaed', roles: ['admin']}
+        return {user: 'cread', roles: ['admin']}
+      },
+      // optional, dy default a simple 403 will be returned when not authorized
+      forbiddenPageFunction: async function (credentials, request, h) {
+        // some fancy "logging"
+        console.log('%s (roles: %s) wanted %s (requires %s) but was not allowed', credentials.user, credentials.roles, request.path, request.route.settings.plugins['hapiAclAuth'].roles)
+        // some fancy error page
+        const response = h.response('<h1>Not Authorized!</h1>')
+        response.code(200)
+        return response.takeover()
       }
     }
   })
@@ -146,7 +155,7 @@ Most options can be specified at the plugin level, or for each individual route.
 | any | `Boolean` | `true` | `true`&#124;`false` | Apecifies whether a user may possess _any_ of the allowed roles in order to be authorized. |
 | all | `Boolean` | `false` | `true`&#124;`false` | Apecifies whether a user _must_ possess _all_ of the allowed routes in order to be authorized. |
 | hierarchy | `Array` |  |  | An `Array` that specifies the privilege hierarchy of roles in order of ascending privilege.  For instance, suppose we have  `hierarchy: ['user', 'admin', 'superuser]` configured for a route and `roles: ['admin']` configured for that same route.  A user with the `superuser` role will be able to access that route because the `superuser` role is of higher privilege than the `admin` role, as specified in the hierarchy. |
-| forbiddenPageFunction | `[async] function(handlerObject, request, h)` |  |  | By default the plugin will respond with a plain `Boom.unauthorized()`, so you can use this function to override that behavior and do whatever you want.|
+| forbiddenPageFunction | `[async] function(handlerObject, request, h)` |  |  | By default the plugin will respond with a plain `Boom.forbidden()`, so you can use this function to override that behavior and do whatever you want.  It is worth noting that if you use this function it is <strong>your responsibility to respond to the request</strong>.  Thus you must return an error (preferably a Boom), a takeover response, or a continue signal.|
 | cache | `Boolean` | `false` | `true`&#124;`false` | If caching is enabled the `roles` arrays will be cached, this is helpful if you use resource intensive functions to return roles in the `handler` function or the `roles` attribute |
 | allowUnauthenticated | `Boolean` | `false` | `true`&#124;`false` | `hapi-acl-auth` makes use of the `onPostAuth` extension point, basically it does its processing to determine whether or not a user should have access before Hapi responds to a request. If you're using an authentication plugin for Hapi, or anything else really, that performs a redirect in order to authenticate, `hapi-acl-auth` will, depending on the value of `policy`, respond with a 403 before a user _has even been authenticated_.  The `allowUnauthenticated` option, when set to `true`, will allow requests where `request.auth.isAuthenticated` is `false` to proceed so that any authentication redirects can occur. |
 

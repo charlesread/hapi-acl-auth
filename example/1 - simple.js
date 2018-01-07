@@ -24,7 +24,16 @@ const server = Hapi.server({
     plugin: require('hapi-acl-auth'),
     options: {
       handler: async function () {
-        return {user: 'creaed', roles: ['admin']}
+        return {user: 'cread', roles: ['admin']}
+      },
+      // optional, dy default a simple 403 will be returned when not authorized
+      forbiddenPageFunction: async function (credentials, request, h) {
+        // some fancy "logging"
+        console.log('%s (roles: %s) wanted %s (requires %s) but was not allowed', credentials.user, credentials.roles, request.path, request.route.settings.plugins['hapiAclAuth'].roles)
+        // some fancy error page
+        const response = h.response('<h1>Not Authorized!</h1>')
+        response.code(200)
+        return response.takeover()
       }
     }
   })
