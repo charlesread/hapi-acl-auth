@@ -27,8 +27,6 @@ plugin.register = async function (server, opts) {
       if (opts.allowUnauthenticated && !req.auth.isAuthenticated) {
         return h.continue
       }
-      debug('req.auth.credentials:')
-      debug(req.auth.credentials)
       const {routeOptions, pluginOptions, combinedOptions} = options(req, opts)
       if ((pluginOptions.policy === 'deny' && combinedOptions.secure) || (pluginOptions.policy === 'allow' && routeOptions.secure)) {
         debug('policy if statement has evaluated to true')
