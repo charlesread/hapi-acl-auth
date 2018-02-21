@@ -1,4 +1,15 @@
+
 [![Build Status](https://travis-ci.org/charlesread/hapi-acl-auth.svg?branch=master)](https://travis-ci.org/charlesread/hapi-acl-auth)
+
+
+----------
+
+
+**IMPORTANT: Please see [this issue](https://github.com/charlesread/hapi-acl-auth/issues/6).**
+
+
+----------
+
 
 <strong>
     Note: most examples in the examples directory are for previous versions, although the logic will still be the same, they will not work with versions 1.x of the plugin.
